@@ -1,6 +1,6 @@
 // tạo khung database
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt'); // Thư viện mã hóa mật khẩu
+const bcrypt = require('bcryptjs'); // Dùng bản JS, tránh lỗi khi deploy // Thư viện mã hóa mật khẩu
 
 const userSchema = new mongoose.Schema({
     name: {
