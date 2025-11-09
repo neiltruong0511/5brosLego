@@ -1,4 +1,3 @@
-// ===== LEGO STORE CONTACT PAGE =====
 import React, { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 
@@ -16,10 +15,8 @@ const ContactPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Demo: log dữ liệu form
     console.log("Form submitted:", formData);
     alert("Cảm ơn bạn! Chúng tôi đã nhận được tin nhắn của bạn.");
-    // Reset form
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
 
@@ -94,7 +91,7 @@ const ContactPage = () => {
               onChange={handleChange}
               required
               className="px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
-            ></textarea>
+            />
             <button
               type="submit"
               className="w-full py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-transform transform hover:scale-105"
@@ -112,7 +109,7 @@ const ContactPage = () => {
             className="w-full h-96 rounded-2xl shadow-md"
             allowFullScreen=""
             loading="lazy"
-          ></iframe>
+          />
         </div>
 
         {/* Mạng xã hội */}
