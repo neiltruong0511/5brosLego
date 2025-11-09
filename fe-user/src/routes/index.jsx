@@ -11,7 +11,7 @@ import ThankYou from "../pages/Thankyou";
 import HistoryOrder from "../pages/HistoryOrder";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Error404 from "../pages/Error404";
-
+import ContactPage from "../pages/ContactPage";
 const privateRoute = [
     { path: "/", element: <Home /> },
     { path: "/about", element: <About /> },
@@ -24,6 +24,7 @@ const privateRoute = [
     { path: "/evaluate", element: <ProtectedRoute><Evaluate /></ProtectedRoute>, layout: null },
     { path: "/thankyou", element: <ProtectedRoute><ThankYou /></ProtectedRoute>, layout: null },
     { path: "/history-order", element: <ProtectedRoute><HistoryOrder /></ProtectedRoute> },
+    { path: "/contact", element: <ContactPage /> },
     { path: "*", element: <Error404 /> },
 ];
 
