@@ -8,11 +8,11 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 
 const menu = [
-  { id: 1, name: "Trang chủ", link: "/#" },
+  { id: 1, name: "Trang chủ", link: "/" },
   { id: 2, name: "Dịch Vụ", link: "/#services" },
   { id: 3, name: "Giới Thiệu", link: "/about" },
   { id: 4, name: "Sản Phẩm", link: "/product" },
-  { id: 5, name: "Liên Hệ", link: "/contact" },
+  { id: 5, name: "Liên Hệ", link: "/contact" }, // Link chuẩn
 ];
 
 const Navbar = () => {
@@ -45,30 +45,21 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Phần bên phải Navbar */}
+          {/* Menu và user */}
           <div className="flex justify-between items-center gap-4">
-            {/* Chế độ Dark/Light */}
+            {/* Dark Mode */}
             <DarkMode />
 
             {/* Menu */}
             <ul className="hidden sm:flex items-center gap-4">
               {menu.map((item) => (
                 <li key={item.id}>
-                  {["/about", "/product", "/contact"].includes(item.link) ? (
-                    <Link
-                      to={item.link}
-                      className="inline-block py-4 px-4 hover:text-[#e60000] font-medium"
-                    >
-                      {item.name}
-                    </Link>
-                  ) : (
-                    <a
-                      href={item.link}
-                      className="inline-block py-4 px-4 hover:text-[#e60000] font-medium"
-                    >
-                      {item.name}
-                    </a>
-                  )}
+                  <Link
+                    to={item.link}
+                    className="inline-block py-4 px-4 hover:text-[#e60000] font-medium"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -81,15 +72,11 @@ const Navbar = () => {
               Giỏ Hàng
               <div className="relative">
                 <FaCartShopping
-                  className={`text-xl text-white drop-shadow-sm cursor-pointer ${
-                    isCartShaking ? "animate-shake" : ""
-                  }`}
+                  className={`text-xl text-white drop-shadow-sm cursor-pointer ${isCartShaking ? "animate-shake" : ""}`}
                 />
                 {cartCount > 0 && (
                   <div className="absolute -top-1 -right-2 bg-white text-[#e60000] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-[#e60000]">
-                    <span className="text-[10px] font-bold leading-none">
-                      {cartCount}
-                    </span>
+                    <span className="text-[10px] font-bold leading-none">{cartCount}</span>
                   </div>
                 )}
               </div>
@@ -98,24 +85,22 @@ const Navbar = () => {
             {/* User Profile hoặc Đăng nhập */}
             {user ? (
               <div className="relative group">
-                <button className="flex flex-col items-center gap-1">
+                <button className="flex items-center gap-1">
                   <div className="w-10 h-10 rounded-full bg-[#e60000] flex items-center justify-center text-white group-hover:bg-[#b30000] transition duration-200 shadow-md">
                     <FaUserCircle className="text-2xl" />
                   </div>
                 </button>
 
                 {/* Dropdown menu */}
-                <div
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50
-                    invisible opacity-0 group-hover:visible group-hover:opacity-100
-                    transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
-                >
-                  <Link
-                    to="/profile"
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50
+                  invisible opacity-0 group-hover:visible group-hover:opacity-100
+                  transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
+                  <a
+                    href="https://5broslego.click/profile"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
                     Thông tin tài khoản
-                  </Link>
+                  </a>
                   <Link
                     to="/history-order"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
