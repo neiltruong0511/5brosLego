@@ -55,12 +55,12 @@ const DiscoverMore = () => {
                 Gợi ý quà tặng phù hợp cho mọi dịp, mọi lứa tuổi và mức giá.  
                 Đừng quên sử dụng thẻ quà tặng nhé!
               </p>
-              <a
-                href="https://5broslego.click/about"
+              <Link
+                to="/product"
                 className="inline-block px-5 py-2 border border-gray-900 dark:border-gray-300 rounded-full font-medium text-gray-900 dark:text-gray-200 hover:bg-gray-900 hover:text-white transition"
               >
                 Mua ngay
-              </a>
+              </Link>
             </div>
           </div>
 
