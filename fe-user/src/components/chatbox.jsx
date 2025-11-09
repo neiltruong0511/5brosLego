@@ -30,7 +30,7 @@ const Chatbox = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/chat", {
+      const response = await axios.post("https://fivebroslego.onrender.com/api/chat", {
         message: input,
         history: messages.map((msg) => ({
           role: msg.from === "bot" ? "assistant" : "user",
