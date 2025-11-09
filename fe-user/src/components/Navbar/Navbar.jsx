@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Logo from "../../assets/lego.png";
 import { FaCartShopping } from "react-icons/fa6";
 import { FaUserCircle } from "react-icons/fa";
@@ -8,7 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 
 const menu = [
-  { id: 1, name: "Trang chủ", link: "/#" },
+  { id: 1, name: "Trang chủ", link: "/" },
   { id: 2, name: "Dịch Vụ", link: "/#services" },
   { id: 3, name: "Giới Thiệu", link: "/about" },
   { id: 4, name: "Sản Phẩm", link: "/product" },
@@ -20,62 +20,46 @@ const Navbar = () => {
   const { cartCount, isCartShaking, updateCartCount } = useCart();
 
   useEffect(() => {
-    if (user) {
-      updateCartCount();
-    }
+    if (user) updateCartCount();
   }, [user]);
 
-  const handleLogout = () => {
-    logout();
-  };
+  const handleLogout = () => logout();
 
   return (
     <div className="h-[80px] flex items-center shadow-md bg-white dark:bg-gray-900 dark:text-white duration-200">
       <div className="container py-3 sm:py-0">
         <div className="flex justify-between items-center">
-          {/* Logo và tên website */}
+          {/* Logo */}
           <div>
-            <a href="/" className="font-bold text-2xl sm:text-3xl flex gap-2">
+            <Link to="/" className="font-bold text-2xl sm:text-3xl flex gap-2">
               <img
                 src={Logo}
                 alt="Logo"
                 className="w-10 border border-black rounded-full"
               />
               5BROSLEGO
-            </a>
+            </Link>
           </div>
 
-          {/* Phần bên phải Navbar */}
+          {/* Menu, Dark Mode và Cart */}
           <div className="flex justify-between items-center gap-4">
-            {/* Dark Mode */}
             <DarkMode />
 
             {/* Menu */}
             <ul className="hidden sm:flex items-center gap-4">
               {menu.map((item) => (
                 <li key={item.id}>
-                  {item.link.startsWith("http") ? (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block py-4 px-4 hover:text-[#e60000] font-medium"
-                    >
-                      {item.name}
-                    </a>
-                  ) : (
-                    <Link
-                      to={item.link}
-                      className="inline-block py-4 px-4 hover:text-[#e60000] font-medium"
-                    >
-                      {item.name}
-                    </Link>
-                  )}
+                  <Link
+                    to={item.link}
+                    className="inline-block py-4 px-4 hover:text-[#e60000] font-medium"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
 
-            {/* Giỏ hàng với số lượng */}
+            {/* Giỏ hàng */}
             <Link
               to="/cart"
               className="bg-[#e60000] hover:bg-[#b30000] text-white py-1 px-4 rounded-full flex items-center gap-3 duration-200 shadow-md"
@@ -97,7 +81,7 @@ const Navbar = () => {
               </div>
             </Link>
 
-            {/* User Profile hoặc Đăng nhập */}
+            {/* User */}
             {user ? (
               <div className="relative group">
                 <button className="flex flex-col items-center gap-1">
@@ -107,17 +91,15 @@ const Navbar = () => {
                 </button>
 
                 {/* Dropdown menu */}
-                <div
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50
-                    invisible opacity-0 group-hover:visible group-hover:opacity-100
-                    transition-all duration-300 transform group-hover:translate-y-0 translate-y-2"
-                >
-                  <a
-                    href="https://5broslego.click/profile"
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50
+                                invisible opacity-0 group-hover:visible group-hover:opacity-100
+                                transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
+                  <Link
+                    to="/profile"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
                     Thông tin tài khoản
-                  </a>
+                  </Link>
                   <Link
                     to="/history-order"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
