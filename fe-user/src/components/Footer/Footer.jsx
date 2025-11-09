@@ -54,10 +54,18 @@ const Footer = () => {
                 Important Links
               </h1>
               <ul className="flex flex-col gap-3 text-gray-700 dark:text-gray-300">
-                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">Home</li>
-                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">About</li>
-                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">Services</li>
-                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">Login</li>
+                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
+                  <a href = "http://localhost:5173/">Home</a>
+                  </li>
+                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
+                  <a href= "http://localhost:5173/about">About</a>
+                  </li>
+                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
+                  <a href= "http://localhost:5173/#services">Service</a>
+                  </li>
+                <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
+                  <a href= "http://localhost:5173/login">Login</a>
+                  </li>
               </ul>
             </div>
 
