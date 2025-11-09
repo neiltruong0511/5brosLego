@@ -55,16 +55,16 @@ const Footer = () => {
               </h1>
               <ul className="flex flex-col gap-3 text-gray-700 dark:text-gray-300">
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href = "http://localhost:5173/">Home</a>
+                  <a href = "https://5broslego.click/">Home</a>
                   </li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href= "http://localhost:5173/about">About</a>
+                  <a href= "https://5broslego.click/about">About</a>
                   </li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href= "http://localhost:5173/#services">Service</a>
+                  <a href= "https://5broslego.click/#services">Service</a>
                   </li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href= "http://localhost:5173/login">Login</a>
+                  <a href= "https://5broslego.click/login">Login</a>
                   </li>
               </ul>
             </div>
