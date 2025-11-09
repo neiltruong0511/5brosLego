@@ -20,31 +20,32 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Thiếu nội dung tin nhắn!" });
     }
 
-    // 🔍 Thêm logic để kiểm tra nếu tin nhắn hỏi về tất cả sản phẩm
-    const askingForAll = message.toLowerCase().includes('tất cả') || 
-                        message.toLowerCase().includes('all') ||
-                        message.toLowerCase().includes('danh sách') ||
-                        message.toLowerCase().includes('hiện') ||
-                        message.toLowerCase().includes('xem');
+    // Sửa phần kiểm tra message
+  const askingForAll = message.toLowerCase().match(/tất cả|all|danh sách|hiện|xem|show/);
 
-    // Nếu hỏi tất cả, lấy toàn bộ sản phẩm (giới hạn 10 sản phẩm)
-    let foundProducts;
-    if (askingForAll) {
-      foundProducts = await Product.find({})
-        .limit(10)
-        .lean();
-    } else {
-      // Tìm kiếm theo từ khóa như cũ
-      foundProducts = await Product.find({
-        $or: [
-          { name: { $regex: message, $options: "i" } },
-          { category: { $regex: message, $options: "i" } },
-          { description: { $regex: message, $options: "i" } },
-        ],
-      })
-        .limit(5)
-        .lean();
-    }
+  // Sửa phần tìm sản phẩm
+  let foundProducts;
+  if (askingForAll) {
+    // Tăng limit lên và bỏ các điều kiện lọc
+    foundProducts = await Product.find()
+      .limit(20)  // Tăng số lượng sản phẩm hiển thị
+      .select('name price category stock description imageUrl') // Chọn các trường cần thiết
+      .lean();
+      
+    // Tạo reply thân thiện hơn khi hiển thị tất cả
+    const reply = `🎉 Đây là danh sách ${foundProducts.length} sản phẩm LEGO hot nhất của shop:\n\n` +
+      foundProducts.map((p, i) => 
+        `${i+1}. ${p.name} - ${p.price.toLocaleString()}đ\n`
+      ).join('');
+      
+    return res.json({
+      reply,
+      products: foundProducts.map(p => ({
+        ...p,
+        image: Array.isArray(p.imageUrl) ? p.imageUrl[0] : p.imageUrl
+      }))
+    });
+  }
     // Cập nhật nội dung phản hồi tùy theo kết quả
     const productContext = foundProducts.length > 0
       ? `Dưới đây là ${askingForAll ? 'danh sách' : 'thông tin'} sản phẩm LEGO:\n\n${foundProducts
