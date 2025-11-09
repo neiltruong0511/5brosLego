@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
+
 import Img1 from "../../assets/discover1.png"; // LEGO tặng quà
 import Img2 from "../../assets/discover2.png"; // LEGO phóng viên
 import Img3 from "../../assets/discover3.jpg"; // LEGO Black Friday
@@ -52,7 +54,7 @@ const DiscoverMore = () => {
                 Trao gửi yêu thương
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm mt-3 mb-5">
-                Gợi ý quà tặng phù hợp cho mọi dịp, mọi lứa tuổi và mức giá.  
+                Gợi ý quà tặng phù hợp cho mọi dịp, mọi lứa tuổi và mức giá.
                 Đừng quên sử dụng thẻ quà tặng nhé!
               </p>
               <Link
