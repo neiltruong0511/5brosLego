@@ -13,7 +13,7 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "",
+    subject: "", 
     message: "",
   });
 
@@ -47,17 +47,17 @@ const ContactPage = () => {
           <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center">
             <FaMapMarkerAlt className="text-3xl text-yellow-500 mb-2" />
             <h3 className="font-bold mb-1">Địa chỉ</h3>
-            <p>123 Đường Lego, Phường Vui Chơi, Quận Sáng Tạo, TP. Hà Nội</p>
+            <p>5 Đặng Thùy Trâm, Phường 25, Bình Thạnh, TP.Hồ Chí Minh</p>
           </div>
           <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center">
             <FaPhoneAlt className="text-3xl text-red-500 mb-2" />
             <h3 className="font-bold mb-1">Số điện thoại</h3>
-            <p>0909 123 456</p>
+            <p>+98 7463921</p>
           </div>
           <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center">
             <FaEnvelope className="text-3xl text-blue-500 mb-2" />
             <h3 className="font-bold mb-1">Email</h3>
-            <p>support@5broslego.com</p>
+            <p>5BROSLEGO@gmail.com</p>
           </div>
         </div>
 
