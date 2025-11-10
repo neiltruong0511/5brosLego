@@ -8,21 +8,16 @@ const Chatbox = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    {
-      from: "bot",
-      text: "👋 Xin chào! Mình là trợ lý LEGO AI — bạn muốn xem bộ LEGO nào nè?",
-    },
+    { from: "bot", text: "👋 Xin chào! Mình là trợ lý LEGO AI — bạn muốn xem bộ LEGO nào nè?" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const chatEndRef = useRef(null);
 
-  // ✅ Tự động cuộn xuống cuối khi có tin nhắn mới
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, suggestedProducts]);
 
-  // ✅ Gửi tin nhắn
   const sendMessage = async (customMessage) => {
     const content = customMessage || input.trim();
     if (!content) return;
@@ -33,16 +28,13 @@ const Chatbox = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://fivebroslego.onrender.com/api/chat",
-        {
-          message: content,
-          history: messages.map((msg) => ({
-            role: msg.from === "bot" ? "assistant" : "user",
-            content: msg.text,
-          })),
-        }
-      );
+      const response = await axios.post("https://fivebroslego.onrender.com/api/chat", {
+        message: content,
+        history: messages.map((msg) => ({
+          role: msg.from === "bot" ? "assistant" : "user",
+          content: msg.text,
+        })),
+      });
 
       const { reply, products, showProducts } = response.data;
       setMessages((prev) => [...prev, { from: "bot", text: reply }]);
@@ -58,7 +50,6 @@ const Chatbox = () => {
     }
   };
 
-  // ✅ Câu hỏi nhanh
   const quickReplies = [
     "LEGO City 🚗",
     "LEGO Technic 🔧",
@@ -90,7 +81,6 @@ const Chatbox = () => {
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Header */}
             <div className="bg-blue-600 text-white p-3 rounded-t-2xl font-semibold flex justify-between items-center">
               💬 Trợ lý LEGO AI
               <button onClick={() => setIsOpen(false)}>
@@ -98,15 +88,9 @@ const Chatbox = () => {
               </button>
             </div>
 
-            {/* Tin nhắn */}
             <div className="flex-1 p-3 overflow-y-auto max-h-96 space-y-2">
               {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${
-                    msg.from === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
+                <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`p-2 rounded-lg text-sm max-w-[75%] ${
                       msg.from === "user"
@@ -118,20 +102,14 @@ const Chatbox = () => {
                   </div>
                 </div>
               ))}
-              {isLoading && (
-                <div className="text-gray-400 text-xs italic">
-                  Đang soạn phản hồi...
-                </div>
-              )}
+              {isLoading && <div className="text-gray-400 text-xs italic">Đang soạn phản hồi...</div>}
               <div ref={chatEndRef} />
             </div>
 
-            {/* 🧱 Hiển thị sản phẩm thật */}
+            {/* 🧱 Gợi ý sản phẩm */}
             {suggestedProducts.length > 0 && (
               <div className="border-t border-gray-200 p-3 bg-gray-50">
-                <div className="font-semibold text-sm mb-2 text-gray-600">
-                  🧱 Gợi ý sản phẩm phù hợp:
-                </div>
+                <div className="font-semibold text-sm mb-2 text-gray-600">🧱 Gợi ý sản phẩm phù hợp:</div>
                 <div className="grid grid-cols-2 gap-2">
                   {suggestedProducts.map((p) => (
                     <Link
@@ -197,4 +175,5 @@ const Chatbox = () => {
 };
 
 export default Chatbox;
+
 
