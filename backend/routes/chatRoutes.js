@@ -6,32 +6,31 @@ import Product from "../models/ProductModels.js";
 dotenv.config();
 const router = express.Router();
 
-// ✅ OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// 💬 Chat endpoint
 router.post("/", async (req, res) => {
   try {
     const { message, history } = req.body;
+    if (!message) return res.status(400).json({ error: "Thiếu nội dung tin nhắn!" });
 
-    if (!message) {
-      return res.status(400).json({ error: "Thiếu nội dung tin nhắn!" });
-    }
+    // ✅ Xác định người dùng đang hỏi về sản phẩm LEGO hay không
+    const productIntent = /(lego|sản phẩm|bộ|giá|mua|xem|set|đồ chơi)/i.test(message);
 
-    // 🔍 Tìm sản phẩm liên quan
-    const foundProducts = await Product.find({
-      $or: [
-        { name: { $regex: message, $options: "i" } },
-        { category: { $regex: message, $options: "i" } },
-        { description: { $regex: message, $options: "i" } },
-      ],
-    })
-      .limit(5)
-      .lean();
+    // 🔍 Tìm sản phẩm phù hợp
+    const foundProducts = productIntent
+      ? await Product.find({
+          $or: [
+            { name: { $regex: message, $options: "i" } },
+            { category: { $regex: message, $options: "i" } },
+            { description: { $regex: message, $options: "i" } },
+          ],
+        })
+          .limit(5)
+          .lean()
+      : [];
 
-    // 🧠 Chuẩn bị dữ liệu sản phẩm thật gửi kèm cho AI
     const productContext =
       foundProducts.length > 0
         ? `Dưới đây là thông tin sản phẩm thật trong kho LEGO:\n\n${foundProducts
@@ -42,22 +41,20 @@ router.post("/", async (req, res) => {
             .join("\n\n")}`
         : "Không tìm thấy sản phẩm phù hợp trong kho LEGO. Hãy gợi ý khách hàng những dòng phổ biến như LEGO City, Technic, Ninjago hoặc Star Wars.";
 
-    // 💬 Tạo hội thoại gửi cho AI
     const messages = [
       {
         role: "system",
         content: `
-        Bạn là trợ lý bán hàng LEGO thân thiện và hiểu biết 😄  
-        Hãy trả lời ngắn gọn, vui vẻ, dùng emoji thân thiện.  
-        Nếu có dữ liệu thật, hãy mô tả đúng và rõ ràng.  
-        Nếu không có dữ liệu, gợi ý khách hàng các dòng phổ biến như LEGO City, Ninjago, Technic, hoặc Star Wars.  
-        Không được bịa thông tin hoặc giá sản phẩm.`,
+        Bạn là trợ lý bán hàng LEGO thân thiện 😄  
+        Nếu có dữ liệu thật thì tóm tắt ngắn gọn, vui vẻ và dùng emoji.  
+        Nếu có sản phẩm phù hợp, nói thêm câu như “Mình tìm được vài bộ LEGO bạn có thể thích nè!”.  
+        Nếu không có sản phẩm, hãy gợi ý khách hàng các dòng nổi bật.  
+        Tuyệt đối không bịa thông tin hoặc giá.`,
       },
       ...(Array.isArray(history) ? history : []),
       { role: "user", content: `${message}\n\n${productContext}` },
     ];
 
-    // 🔮 Gọi OpenAI API
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
@@ -69,7 +66,6 @@ router.post("/", async (req, res) => {
       completion.choices?.[0]?.message?.content ||
       "Xin lỗi 😅, tôi chưa rõ bạn muốn tìm sản phẩm nào.";
 
-    // 🖼 Chuẩn bị dữ liệu sản phẩm gửi về FE
     const productsWithImage = foundProducts.map((p) => ({
       _id: p._id,
       name: p.name,
@@ -80,7 +76,11 @@ router.post("/", async (req, res) => {
       image: Array.isArray(p.imageUrl) ? p.imageUrl[0] : p.imageUrl,
     }));
 
-    res.json({ reply, products: productsWithImage });
+    res.json({
+      reply,
+      products: productsWithImage,
+      showProducts: foundProducts.length > 0,
+    });
   } catch (err) {
     console.error("❌ Lỗi /api/chat:", err);
     res.status(500).json({ error: "Lỗi khi gọi OpenAI API" });
@@ -88,3 +88,4 @@ router.post("/", async (req, res) => {
 });
 
 export default router;
+
