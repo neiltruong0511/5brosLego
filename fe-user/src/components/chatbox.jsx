@@ -15,32 +15,40 @@ const Chatbox = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const chatEndRef = useRef(null);
 
+  // ✅ Tự động cuộn xuống cuối khi có tin nhắn mới
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  // ✅ Gửi tin nhắn người dùng
+  const sendMessage = async (customMessage) => {
+    const content = customMessage || input.trim();
+    if (!content) return;
 
-    const userMessage = { from: "user", text: input };
+    const userMessage = { from: "user", text: content };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
     try {
       const response = await axios.post("https://fivebroslego.onrender.com/api/chat", {
-        message: input,
+        message: content,
         history: messages.map((msg) => ({
           role: msg.from === "bot" ? "assistant" : "user",
           content: msg.text,
         })),
       });
 
-      const { reply, products } = response.data;
+      const { reply, products, showProducts } = response.data;
+
+      // ✅ Thêm phản hồi AI
       setMessages((prev) => [...prev, { from: "bot", text: reply }]);
-      setSuggestedProducts(products || []);
+
+      // ✅ Nếu API xác định là câu hỏi về sản phẩm thì hiển thị danh sách
+      setSuggestedProducts(showProducts ? products || [] : []);
     } catch (err) {
       console.error("Lỗi gửi tin nhắn:", err);
       setMessages((prev) => [
@@ -55,8 +63,17 @@ const Chatbox = () => {
     }
   };
 
+  // ✅ Các nút gợi ý nhanh
+  const quickReplies = [
+    "LEGO City 🚗",
+    "LEGO Technic 🔧",
+    "LEGO Star Wars 🚀",
+    "LEGO Ninjago 🐉",
+  ];
+
   return (
     <>
+      {/* Nút mở chat */}
       <motion.button
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700"
         whileHover={{ scale: 1.1 }}
@@ -66,6 +83,7 @@ const Chatbox = () => {
         {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
       </motion.button>
 
+      {/* Hộp chat */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -75,10 +93,12 @@ const Chatbox = () => {
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.3 }}
           >
+            {/* Header */}
             <div className="bg-blue-600 text-white p-3 rounded-t-2xl font-semibold">
               💬 Trợ lý LEGO AI
             </div>
 
+            {/* Khu vực hội thoại */}
             <div className="flex-1 p-3 overflow-y-auto max-h-96 space-y-2">
               {messages.map((msg, i) => (
                 <div
@@ -106,6 +126,7 @@ const Chatbox = () => {
               <div ref={chatEndRef} />
             </div>
 
+            {/* 🧱 Hiển thị sản phẩm gợi ý */}
             {suggestedProducts.length > 0 && (
               <div className="border-t border-gray-200 p-3 bg-gray-50">
                 <div className="font-semibold text-sm mb-2 text-gray-600">
@@ -137,21 +158,38 @@ const Chatbox = () => {
               </div>
             )}
 
-            <div className="flex p-3 border-t">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                placeholder="Nhập tin nhắn..."
-                className="flex-1 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none"
-              />
-              <button
-                onClick={sendMessage}
-                className="ml-2 bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
-              >
-                <Send size={16} />
-              </button>
+            {/* Ô nhập + gợi ý nhanh */}
+            <div className="flex flex-col border-t">
+              {/* Quick reply buttons */}
+              <div className="flex flex-wrap gap-2 px-3 py-2 bg-gray-50">
+                {quickReplies.map((text, i) => (
+                  <button
+                    key={i}
+                    onClick={() => sendMessage(text)}
+                    className="bg-gray-200 hover:bg-blue-100 text-gray-700 text-xs rounded-full px-3 py-1 transition"
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+
+              {/* Input + nút gửi */}
+              <div className="flex p-3 border-t">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  placeholder="Nhập tin nhắn..."
+                  className="flex-1 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none"
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  className="ml-2 bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
+                >
+                  <Send size={16} />
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
