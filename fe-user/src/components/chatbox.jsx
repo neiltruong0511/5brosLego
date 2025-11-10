@@ -17,53 +17,48 @@ const Chatbox = () => {
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const chatEndRef = useRef(null);
 
-  // ✅ Auto scroll khi có tin nhắn mới
+  // ✅ Tự động cuộn xuống cuối khi có tin nhắn mới
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, suggestedProducts]);
 
-  // ✅ Gửi tin nhắn đến API
+  // ✅ Gửi tin nhắn
   const sendMessage = async (customMessage) => {
     const content = customMessage || input.trim();
     if (!content) return;
 
-    // Hiển thị tin nhắn người dùng
     const userMessage = { from: "user", text: content };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
     try {
-      const response = await axios.post("https://fivebroslego.onrender.com/api/chat", {
-        message: content,
-        history: messages.map((msg) => ({
-          role: msg.from === "bot" ? "assistant" : "user",
-          content: msg.text,
-        })),
-      });
+      const response = await axios.post(
+        "https://fivebroslego.onrender.com/api/chat",
+        {
+          message: content,
+          history: messages.map((msg) => ({
+            role: msg.from === "bot" ? "assistant" : "user",
+            content: msg.text,
+          })),
+        }
+      );
 
       const { reply, products, showProducts } = response.data;
-
-      // ✅ Thêm phản hồi AI
       setMessages((prev) => [...prev, { from: "bot", text: reply }]);
-
-      // ✅ Nếu là câu hỏi về sản phẩm thì hiển thị gợi ý
       setSuggestedProducts(showProducts ? products || [] : []);
     } catch (err) {
-      console.error("❌ Lỗi gửi tin nhắn:", err);
+      console.error("❌ Lỗi khi gửi tin nhắn:", err);
       setMessages((prev) => [
         ...prev,
-        {
-          from: "bot",
-          text: "😅 Xin lỗi, hiện tại tôi đang gặp sự cố. Bạn thử lại nhé!",
-        },
+        { from: "bot", text: "😅 Xin lỗi, tôi đang gặp sự cố. Hãy thử lại nhé!" },
       ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ✅ Các câu gợi ý nhanh
+  // ✅ Câu hỏi nhanh
   const quickReplies = [
     "LEGO City 🚗",
     "LEGO Technic 🔧",
@@ -75,7 +70,7 @@ const Chatbox = () => {
 
   return (
     <>
-      {/* Nút mở/đóng chat */}
+      {/* 🔘 Nút bật/tắt chat */}
       <motion.button
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700"
         whileHover={{ scale: 1.1 }}
@@ -85,7 +80,7 @@ const Chatbox = () => {
         {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
       </motion.button>
 
-      {/* Hộp chat */}
+      {/* 💬 Hộp chat */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -103,7 +98,7 @@ const Chatbox = () => {
               </button>
             </div>
 
-            {/* Khung chat */}
+            {/* Tin nhắn */}
             <div className="flex-1 p-3 overflow-y-auto max-h-96 space-y-2">
               {messages.map((msg, i) => (
                 <div
@@ -131,7 +126,7 @@ const Chatbox = () => {
               <div ref={chatEndRef} />
             </div>
 
-            {/* 🧱 Sản phẩm gợi ý */}
+            {/* 🧱 Hiển thị sản phẩm thật */}
             {suggestedProducts.length > 0 && (
               <div className="border-t border-gray-200 p-3 bg-gray-50">
                 <div className="font-semibold text-sm mb-2 text-gray-600">
@@ -163,9 +158,8 @@ const Chatbox = () => {
               </div>
             )}
 
-            {/* Quick reply + Input */}
+            {/* Nút nhanh + input */}
             <div className="flex flex-col border-t">
-              {/* Quick replies */}
               <div className="flex flex-wrap gap-2 px-3 py-2 bg-gray-50">
                 {quickReplies.map((text, i) => (
                   <button
@@ -178,7 +172,6 @@ const Chatbox = () => {
                 ))}
               </div>
 
-              {/* Input */}
               <div className="flex p-3 border-t">
                 <input
                   type="text"
@@ -204,3 +197,4 @@ const Chatbox = () => {
 };
 
 export default Chatbox;
+
