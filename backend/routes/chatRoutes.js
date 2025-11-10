@@ -15,46 +15,76 @@ router.post("/", async (req, res) => {
     const { message, history } = req.body;
     if (!message) return res.status(400).json({ error: "Thiếu nội dung tin nhắn!" });
 
-    // ✅ Xác định người dùng đang hỏi về sản phẩm LEGO hay không
+    // ✅ Danh mục LEGO thật trong cửa hàng
+    const categories = [
+      "Lego Architecture",
+      "Lego City",
+      "Lego Friends",
+      "Lego Technic",
+      "Lego Ninjago",
+      "Lego DC Super Heroes",
+    ];
+
+    // ✅ Xác định xem người dùng có đang nói về sản phẩm không
     const productIntent = /(lego|sản phẩm|bộ|giá|mua|xem|set|đồ chơi)/i.test(message);
 
-    // 🔍 Tìm sản phẩm phù hợp
-    const foundProducts = productIntent
-      ? await Product.find({
+    // ✅ Tự động nhận diện danh mục LEGO mà người dùng đề cập
+    const detectedCategory = categories.find((cat) =>
+      message.toLowerCase().includes(cat.toLowerCase().replace("lego ", ""))
+    );
+
+    // ✅ Nếu có danh mục cụ thể → lọc theo category, ngược lại → tìm theo từ khóa
+    const query = detectedCategory
+      ? { category: detectedCategory }
+      : {
           $or: [
             { name: { $regex: message, $options: "i" } },
             { category: { $regex: message, $options: "i" } },
             { description: { $regex: message, $options: "i" } },
           ],
-        })
-          .limit(5)
-          .lean()
+        };
+
+    // ✅ Lấy sản phẩm phù hợp (mới nhất trước)
+    const foundProducts = productIntent
+      ? await Product.find(query).sort({ createdAt: -1 }).limit(5).lean()
       : [];
 
+    // ✅ Chuẩn bị ngữ cảnh sản phẩm thật cho AI
     const productContext =
       foundProducts.length > 0
-        ? `Dưới đây là thông tin sản phẩm thật trong kho LEGO:\n\n${foundProducts
+        ? `Dưới đây là các sản phẩm thật trong kho LEGO:\n\n${foundProducts
             .map(
               (p, i) =>
                 `${i + 1}. ${p.name}\n💰 Giá: ${p.price.toLocaleString()} VNĐ\n🏷️ Danh mục: ${p.category}\n📦 Tồn kho: ${p.stock}\n📝 Mô tả: ${p.description}`
             )
             .join("\n\n")}`
-        : "Không tìm thấy sản phẩm phù hợp trong kho LEGO. Hãy gợi ý khách hàng những dòng phổ biến như LEGO City, Technic, Ninjago hoặc Star Wars.";
+        : `Không tìm thấy sản phẩm phù hợp trong kho LEGO.
+Hãy gợi ý khách hàng những dòng nổi bật hiện có:
+- LEGO Architecture 🏛️
+- LEGO City 🚗
+- LEGO Friends 💖
+- LEGO Technic ⚙️
+- LEGO Ninjago 🐉
+- LEGO DC Super Heroes 🦸‍♂️`;
 
+    // ✅ Tạo lịch sử hội thoại gửi đến OpenAI
     const messages = [
       {
         role: "system",
         content: `
         Bạn là trợ lý bán hàng LEGO thân thiện 😄  
-        Nếu có dữ liệu thật thì tóm tắt ngắn gọn, vui vẻ và dùng emoji.  
-        Nếu có sản phẩm phù hợp, nói thêm câu như “Mình tìm được vài bộ LEGO bạn có thể thích nè!”.  
-        Nếu không có sản phẩm, hãy gợi ý khách hàng các dòng nổi bật.  
-        Tuyệt đối không bịa thông tin hoặc giá.`,
+        Nhiệm vụ của bạn:
+        - Giới thiệu sản phẩm dựa trên dữ liệu thật (không bịa).
+        - Nếu có sản phẩm phù hợp, hãy nói ngắn gọn, vui vẻ, dùng emoji.
+        - Nếu không có sản phẩm, hãy gợi ý khách hàng những dòng LEGO nổi bật trong cửa hàng.
+        - Luôn ưu tiên trả lời bằng tiếng Việt, giọng thân thiện, tự nhiên.
+        - Không nói về sản phẩm ngoài LEGO.`,
       },
       ...(Array.isArray(history) ? history : []),
       { role: "user", content: `${message}\n\n${productContext}` },
     ];
 
+    // ✅ Gọi OpenAI để tạo phản hồi
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
@@ -64,8 +94,9 @@ router.post("/", async (req, res) => {
 
     const reply =
       completion.choices?.[0]?.message?.content ||
-      "Xin lỗi 😅, tôi chưa rõ bạn muốn tìm sản phẩm nào.";
+      "😅 Xin lỗi, tôi chưa rõ bạn muốn tìm sản phẩm nào.";
 
+    // ✅ Trả về sản phẩm có ảnh (ưu tiên ảnh đầu tiên)
     const productsWithImage = foundProducts.map((p) => ({
       _id: p._id,
       name: p.name,
@@ -76,6 +107,7 @@ router.post("/", async (req, res) => {
       image: Array.isArray(p.imageUrl) ? p.imageUrl[0] : p.imageUrl,
     }));
 
+    // ✅ Gửi kết quả phản hồi
     res.json({
       reply,
       products: productsWithImage,
@@ -88,4 +120,5 @@ router.post("/", async (req, res) => {
 });
 
 export default router;
+
 
