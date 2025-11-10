@@ -27,9 +27,7 @@ router.post("/", async (req, res) => {
     ];
 
     // ✅ Phát hiện người dùng nói về sản phẩm
-    const productIntent = /(lego|sản phẩm|bộ|giá|mua|set|đồ chơi)/i.test(
-      message
-    );
+    const productIntent = /(lego|sản phẩm|bộ|giá|mua|set|đồ chơi)/i.test(message);
 
     // ✅ Tự động xác định danh mục LEGO
     const detectedCategory = categories.find((cat) =>
@@ -47,12 +45,12 @@ router.post("/", async (req, res) => {
           ],
         };
 
-    // ✅ Tìm sản phẩm thực tế
+    // ✅ Lấy sản phẩm thực tế từ MongoDB
     const foundProducts = productIntent
       ? await Product.find(query).sort({ createdAt: -1 }).limit(5).lean()
       : [];
 
-    // ✅ Tạo ngữ cảnh cho AI (để hiểu và phản hồi tự nhiên)
+    // ✅ Bối cảnh cho AI (để nó trả lời thân thiện)
     const productContext =
       foundProducts.length > 0
         ? `Dưới đây là các sản phẩm thật trong cửa hàng LEGO:\n\n${foundProducts
@@ -61,8 +59,7 @@ router.post("/", async (req, res) => {
                 `${i + 1}. ${p.name}\n💰 Giá: ${p.price.toLocaleString()}đ\n🏷️ Danh mục: ${p.category}\n📦 Tồn kho: ${p.stock}\n📝 Mô tả: ${p.description}`
             )
             .join("\n\n")}`
-        : `Không tìm thấy sản phẩm phù hợp trong kho LEGO.
-Gợi ý khách hàng những dòng LEGO hiện có:
+        : `Không tìm thấy sản phẩm phù hợp. Gợi ý khách hàng xem các danh mục sau:
 - LEGO Architecture 🏛️
 - LEGO City 🚗
 - LEGO Friends 💖
@@ -70,16 +67,15 @@ Gợi ý khách hàng những dòng LEGO hiện có:
 - LEGO Ninjago 🐉
 - LEGO DC Super Heroes 🦸‍♂️`;
 
-    // ✅ Chuẩn bị hội thoại gửi đến OpenAI
+    // ✅ Chuẩn bị hội thoại cho AI
     const messages = [
       {
         role: "system",
         content: `
         Bạn là trợ lý LEGO AI thân thiện 😄
         - Dựa trên dữ liệu thật của sản phẩm.
-        - Trả lời ngắn gọn, tự nhiên, có emoji, giọng thân thiện.
-        - Nếu có ảnh, giá, tồn kho thì mô tả tự nhiên giống tư vấn viên.
-        - Nếu không có sản phẩm, gợi ý khách hàng xem danh mục khác.`,
+        - Trả lời ngắn gọn, tự nhiên, có emoji, như nhân viên tư vấn LEGO thật.
+        - Nếu không có sản phẩm, gợi ý danh mục khác.`,
       },
       ...(Array.isArray(history) ? history : []),
       { role: "user", content: `${message}\n\n${productContext}` },
@@ -97,7 +93,7 @@ Gợi ý khách hàng những dòng LEGO hiện có:
       completion.choices?.[0]?.message?.content ||
       "😅 Xin lỗi, tôi chưa rõ bạn muốn tìm sản phẩm nào.";
 
-    // ✅ Chuẩn bị dữ liệu trả về FE
+    // ✅ Dọn dữ liệu gửi về FE
     const productsWithImage = foundProducts.map((p) => ({
       _id: p._id,
       name: p.name,
@@ -105,7 +101,12 @@ Gợi ý khách hàng những dòng LEGO hiện có:
       stock: p.stock,
       category: p.category,
       description: p.description,
-      image: Array.isArray(p.imageUrl) ? p.imageUrl[0] : p.imageUrl,
+      image:
+        Array.isArray(p.imageUrl) && p.imageUrl.length > 0
+          ? p.imageUrl[0]
+          : typeof p.imageUrl === "string"
+          ? p.imageUrl
+          : null,
     }));
 
     res.json({
@@ -120,6 +121,7 @@ Gợi ý khách hàng những dòng LEGO hiện có:
 });
 
 export default router;
+
 
 
 
