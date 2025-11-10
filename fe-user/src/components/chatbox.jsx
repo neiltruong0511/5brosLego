@@ -15,19 +15,19 @@ const Chatbox = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [suggestedProducts, setSuggestedProducts] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const chatEndRef = useRef(null);
 
-  // ✅ Tự động cuộn xuống cuối khi có tin nhắn mới
+  // ✅ Auto scroll khi có tin nhắn mới
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ✅ Gửi tin nhắn người dùng
+  // ✅ Gửi tin nhắn đến API
   const sendMessage = async (customMessage) => {
     const content = customMessage || input.trim();
     if (!content) return;
 
+    // Hiển thị tin nhắn người dùng
     const userMessage = { from: "user", text: content };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -47,10 +47,10 @@ const Chatbox = () => {
       // ✅ Thêm phản hồi AI
       setMessages((prev) => [...prev, { from: "bot", text: reply }]);
 
-      // ✅ Nếu API xác định là câu hỏi về sản phẩm thì hiển thị danh sách
+      // ✅ Nếu là câu hỏi về sản phẩm thì hiển thị gợi ý
       setSuggestedProducts(showProducts ? products || [] : []);
     } catch (err) {
-      console.error("Lỗi gửi tin nhắn:", err);
+      console.error("❌ Lỗi gửi tin nhắn:", err);
       setMessages((prev) => [
         ...prev,
         {
@@ -63,17 +63,19 @@ const Chatbox = () => {
     }
   };
 
-  // ✅ Các nút gợi ý nhanh
+  // ✅ Các câu gợi ý nhanh
   const quickReplies = [
     "LEGO City 🚗",
     "LEGO Technic 🔧",
-    "LEGO Star Wars 🚀",
+    "LEGO Friends 💖",
     "LEGO Ninjago 🐉",
+    "LEGO DC Super Heroes 🦸‍♂️",
+    "LEGO Architecture 🏛️",
   ];
 
   return (
     <>
-      {/* Nút mở chat */}
+      {/* Nút mở/đóng chat */}
       <motion.button
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700"
         whileHover={{ scale: 1.1 }}
@@ -94,11 +96,14 @@ const Chatbox = () => {
             transition={{ duration: 0.3 }}
           >
             {/* Header */}
-            <div className="bg-blue-600 text-white p-3 rounded-t-2xl font-semibold">
+            <div className="bg-blue-600 text-white p-3 rounded-t-2xl font-semibold flex justify-between items-center">
               💬 Trợ lý LEGO AI
+              <button onClick={() => setIsOpen(false)}>
+                <X size={18} className="text-white" />
+              </button>
             </div>
 
-            {/* Khu vực hội thoại */}
+            {/* Khung chat */}
             <div className="flex-1 p-3 overflow-y-auto max-h-96 space-y-2">
               {messages.map((msg, i) => (
                 <div
@@ -126,7 +131,7 @@ const Chatbox = () => {
               <div ref={chatEndRef} />
             </div>
 
-            {/* 🧱 Hiển thị sản phẩm gợi ý */}
+            {/* 🧱 Sản phẩm gợi ý */}
             {suggestedProducts.length > 0 && (
               <div className="border-t border-gray-200 p-3 bg-gray-50">
                 <div className="font-semibold text-sm mb-2 text-gray-600">
@@ -149,7 +154,7 @@ const Chatbox = () => {
                       <div className="p-1 text-xs text-center">
                         <div className="font-semibold truncate">{p.name}</div>
                         <div className="text-blue-600 font-bold">
-                          {p.price.toLocaleString()}đ
+                          {p.price?.toLocaleString()}đ
                         </div>
                       </div>
                     </Link>
@@ -158,9 +163,9 @@ const Chatbox = () => {
               </div>
             )}
 
-            {/* Ô nhập + gợi ý nhanh */}
+            {/* Quick reply + Input */}
             <div className="flex flex-col border-t">
-              {/* Quick reply buttons */}
+              {/* Quick replies */}
               <div className="flex flex-wrap gap-2 px-3 py-2 bg-gray-50">
                 {quickReplies.map((text, i) => (
                   <button
@@ -173,7 +178,7 @@ const Chatbox = () => {
                 ))}
               </div>
 
-              {/* Input + nút gửi */}
+              {/* Input */}
               <div className="flex p-3 border-t">
                 <input
                   type="text"
