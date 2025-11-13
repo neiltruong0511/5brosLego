@@ -1,5 +1,24 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/(robots\\.txt|sitemap\\.xml)",
+      "destination": "/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(robots\\.txt|sitemap\\.xml)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/xml"
+        }
+      ]
+    }
   ]
 }
+
