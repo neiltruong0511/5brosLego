@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
     // B. Nếu khách tìm kiếm cụ thể
     else {
       // Các danh mục LEGO (Khớp với field 'category' trong DB)
-      const categories = ["Architecture", "City", "Friends", "Technic", "Ninjago", "DC Super Heroes", "Star Wars"];
+      const categories = ["Architecture", "City", "Friends", "Technic", "Ninjago", "DC Super Heroes", ];
       const detectedCategory = categories.find(cat => userMsg.includes(cat.toLowerCase()));
 
       let query = {};
