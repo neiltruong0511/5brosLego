@@ -1,51 +1,46 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'; // 👈 Sửa dòng này: dùng import thay vì require
 
 const productSchema = new mongoose.Schema({
-    // ten san pham
+    // Tên sản phẩm
     name: {
         type: String,
         required: true
     },
-    // mo ta san pham
+    // Mô tả sản phẩm
     description: {
         type: String,
         required: true
     },
-    // gia san pham
+    // Giá sản phẩm
     price: {
         type: Number,
         required: true,
         min: 0
     },
-
-    // hinh anh san pham
+    // Hình ảnh sản phẩm (Link ảnh)
     imageUrl: {
         type: [String],
         required: true
     },
-
-    // Thêm trường images để lưu dữ liệu nhị phân
+    // Dữ liệu ảnh nhị phân (nếu dùng)
     images: [{
         data: Buffer,
         contentType: String,
         name: String
     }],
-
-    // danh muc san pham
+    // Danh mục sản phẩm
     category: {
         type: String,
         required: true
     },
-
-    // so luong ton kho
+    // Số lượng tồn kho
     stock: {
         type: Number,
         required: true,
         min: 0,
         default: 0
     },
-
-    // san pham noi bat 
+    // Sản phẩm nổi bật 
     isFeatured: {
         type: Boolean,
         default: false
@@ -68,4 +63,5 @@ productSchema.pre('save', function (next) {
 
 // Tạo model
 const Product = mongoose.model('Product', productSchema);
-export default Product;
+
+export default Product; // 👈 Sửa dòng này: dùng export default thay vì module.exports
