@@ -1,6 +1,6 @@
 import React from "react";
 import Slider from "react-slick";
-import BgPattern from "../../assets/vector3.png"; // ✅ Thêm ảnh nền
+import BgPattern from "../../assets/vector3.png"; 
 
 // Dữ liệu giả định về các nhận xét của khách hàng
 const testimonialData = [
@@ -56,7 +56,7 @@ const Testimonial = () => {
       <div
         className="py-16 relative bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url(${BgPattern})`, // ✅ Thêm background
+          backgroundImage: `url(${BgPattern})`, 
         }}
         data-aos="fade-up"
         data-aos-duration="400"
@@ -67,9 +67,9 @@ const Testimonial = () => {
         <div className="relative container mx-auto z-10">
           {/* Tiêu đề */}
           <div className="text-center mb-10 max-w-[600px] mx-auto">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#6b3f24] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#6b3f24] mb-4">
               Phản Hồi Khách Hàng
-            </h1>
+            </h2>
             <p className="text-gray-600 text-sm md:text-base italic">
               “Tôi thực sự ấn tượng với chất lượng sản phẩm và dịch vụ. Bộ Lego
               rất đẹp, các mảnh ghép tinh xảo, đóng gói cẩn thận, giao hàng
@@ -93,9 +93,11 @@ const Testimonial = () => {
                       alt={data.name}
                     />
                     <p className="text-gray-600 text-sm italic">{data.text}</p>
-                    <h1 className="text-lg font-bold text-[#6b3f24]">
+                    
+                    <h3 className="text-lg font-bold text-[#6b3f24]">
                       {data.name}
-                    </h1>
+                    </h3>
+                    
                     <p className="text-[#e11d48]/20 text-8xl font-serif absolute top-0 right-4">
                       “”
                     </p>
