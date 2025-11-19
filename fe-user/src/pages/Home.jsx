@@ -6,7 +6,7 @@ import AppStore from '../components/AppStore/AppStore'
 import Testimonial from '../components/Testimonial/Testimonial'
 
 
-import About from '../pages/About/About' 
+import About from './About' 
 
 const Home = () => {
   return (
@@ -14,7 +14,7 @@ const Home = () => {
       {/* Component phần tiêu đề chính */}
       <Hero />
 
-      {/* About */}
+
       <About />
 
       {/* Component giới thiệu dịch vụ */}
