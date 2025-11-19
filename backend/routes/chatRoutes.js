@@ -13,115 +13,124 @@ const client = new OpenAI({
 router.post("/", async (req, res) => {
   try {
     const { message, history } = req.body;
-    if (!message)
-      return res.status(400).json({ error: "Thiếu nội dung tin nhắn!" });
+    if (!message) return res.status(400).json({ error: "Thiếu nội dung tin nhắn!" });
 
-    // ✅ Danh mục LEGO có thật trong cửa hàng
-    const categories = [
-      "LEGO Architecture",
-      "LEGO City",
-      "LEGO Friends",
-      "LEGO Technic",
-      "LEGO Ninjago",
-      "LEGO DC Super Heroes",
-    ];
+    const userMsg = message.toLowerCase();
 
-    // ✅ Phát hiện người dùng nói về sản phẩm
-    const productIntent = /(lego|sản phẩm|bộ|giá|mua|set|đồ chơi)/i.test(message);
+    // --- KỊCH BẢN 1: KHÁCH MUỐN XEM TẤT CẢ / SẢN PHẨM MỚI ---
+    if (userMsg.match(/(tất cả|all|danh sách|mới nhất|show|xem hàng)/)) {
+      const allProducts = await Product.find()
+        .sort({ createdAt: -1 })
+        .limit(10) // Lấy 10 sản phẩm mới nhất
+        .select('name price category stock imageUrl')
+        .lean();
 
-    // ✅ Tự động xác định danh mục LEGO
-    const detectedCategory = categories.find((cat) =>
-      message.toLowerCase().includes(cat.toLowerCase().replace("lego ", ""))
-    );
+      return res.json({
+        reply: "🎉 Dạ đây là những mẫu LEGO mới nhất vừa cập bến tại 5BROSLEGO ạ! Bạn ưng mẫu nào cứ bấm vào xem chi tiết nhé 👇",
+        products: processProductsImages(allProducts),
+        showProducts: true,
+      });
+    }
 
-    // ✅ Tạo truy vấn MongoDB
-    const query = detectedCategory
-      ? { category: detectedCategory }
-      : {
-          $or: [
-            { name: { $regex: message, $options: "i" } },
-            { category: { $regex: message, $options: "i" } },
-            { description: { $regex: message, $options: "i" } },
-          ],
-        };
+    // --- KỊCH BẢN 2: TÌM KIẾM SẢN PHẨM CỤ THỂ ---
+    
+    // 1. Xác định danh mục (nếu có)
+    const categories = ["Architecture", "City", "Friends", "Technic", "Ninjago", "DC Super Heroes"];
+    const detectedCategory = categories.find(cat => userMsg.includes(cat.toLowerCase()));
 
-    // ✅ Lấy sản phẩm thực tế từ MongoDB
-    const foundProducts = productIntent
-      ? await Product.find(query).sort({ createdAt: -1 }).limit(5).lean()
-      : [];
+    // 2. Tạo query tìm kiếm
+    let query = {};
+    if (detectedCategory) {
+      query = { category: { $regex: detectedCategory, $options: "i" } };
+    } else {
+      // Tìm theo tên hoặc mô tả
+      query = {
+        $or: [
+          { name: { $regex: message, $options: "i" } },
+          { description: { $regex: message, $options: "i" } },
+          { category: { $regex: message, $options: "i" } }
+        ]
+      };
+    }
 
-    // ✅ Bối cảnh cho AI (để nó trả lời thân thiện)
-    const productContext =
-      foundProducts.length > 0
-        ? `Dưới đây là các sản phẩm thật trong cửa hàng LEGO:\n\n${foundProducts
-            .map(
-              (p, i) =>
-                `${i + 1}. ${p.name}\n💰 Giá: ${p.price.toLocaleString()}đ\n🏷️ Danh mục: ${p.category}\n📦 Tồn kho: ${p.stock}\n📝 Mô tả: ${p.description}`
-            )
-            .join("\n\n")}`
-        : `Không tìm thấy sản phẩm phù hợp. Gợi ý khách hàng xem các danh mục sau:
-- LEGO Architecture 🏛️
-- LEGO City 🚗
-- LEGO Friends 💖
-- LEGO Technic ⚙️
-- LEGO Ninjago 🐉
-- LEGO DC Super Heroes 🦸‍♂️`;
+    // 3. Gọi DB
+    // Chỉ tìm sản phẩm nếu câu hỏi có liên quan đến mua sắm/lego
+    const isShoppingIntent = /(lego|giá|mua|tìm|có mẫu|bộ|set|bi nhiêu)/.test(userMsg);
+    
+    let foundProducts = [];
+    if (isShoppingIntent || detectedCategory) {
+      foundProducts = await Product.find(query).limit(5).lean();
+    }
 
-    // ✅ Chuẩn bị hội thoại cho AI
+    // --- KỊCH BẢN 3: GỬI DỮ LIỆU CHO AI (OPENAI) ---
+
+    // Tạo bối cảnh dữ liệu sản phẩm cho AI đọc
+    let productContext = "";
+    if (foundProducts.length > 0) {
+      const list = foundProducts.map((p, i) => 
+        `${i+1}. ${p.name} | Giá: ${p.price?.toLocaleString()}đ | Kho: ${p.stock}`
+      ).join("\n");
+      productContext = `Dưới đây là danh sách sản phẩm thực tế shop đang có khớp với câu hỏi:\n${list}\n\nHãy giới thiệu các sản phẩm này cho khách.`;
+    } else if (isShoppingIntent) {
+      productContext = "Hiện tại hệ thống không tìm thấy sản phẩm nào khớp với từ khóa của khách. Hãy khéo léo xin lỗi và gợi ý khách xem các danh mục khác.";
+    }
+
+    // 🔥 KỊCH BẢN CHÍNH (SYSTEM PROMPT)
+    const systemPrompt = `
+    Bạn là "Trợ lý ảo AI" của cửa hàng "5BROSLEGO" (Website: https://5broslego.click/).
+    
+    THÔNG TIN CỬA HÀNG:
+    - Địa chỉ: 5 Đặng Thùy Trâm, Phường 25, Bình Thạnh, TP.HCM.
+    - SĐT: +98 7463921.
+    
+    PHONG CÁCH TRẢ LỜI:
+    - Thân thiện, nhiệt tình, dùng nhiều emoji 😄 🧱 🚀.
+    - Trả lời ngắn gọn (dưới 3 câu).
+    - Luôn hướng khách hàng đến việc mua hàng trên website.
+    
+    QUY TẮC QUAN TRỌNG:
+    1. Nếu có danh sách sản phẩm được cung cấp trong [Context], hãy mời khách xem bên dưới.
+    2. Nếu khách hỏi địa chỉ hoặc liên hệ, hãy cung cấp thông tin cửa hàng ở trên.
+    3. Nếu khách hỏi vấn đề không liên quan đến LEGO, hãy từ chối khéo léo.
+    `;
+
     const messages = [
-      {
-        role: "system",
-        content: `
-        Bạn là trợ lý LEGO AI thân thiện 😄
-        - Dựa trên dữ liệu thật của sản phẩm.
-        - Trả lời ngắn gọn, tự nhiên, có emoji, như nhân viên tư vấn LEGO thật.
-        - Nếu không có sản phẩm, gợi ý danh mục khác.`,
-      },
-      ...(Array.isArray(history) ? history : []),
-      { role: "user", content: `${message}\n\n${productContext}` },
+      { role: "system", content: systemPrompt },
+      ...(Array.isArray(history) ? history : []), // Lịch sử chat
+      { role: "user", content: `${message}\n\n[CONTEXT DỮ LIỆU]: ${productContext}` },
     ];
 
-    // ✅ Gọi OpenAI API
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
-      max_tokens: 500,
+      max_tokens: 300,
       temperature: 0.7,
     });
 
-    const reply =
-      completion.choices?.[0]?.message?.content ||
-      "😅 Xin lỗi, tôi chưa rõ bạn muốn tìm sản phẩm nào.";
+    const reply = completion.choices[0].message.content;
 
-    // ✅ Dọn dữ liệu gửi về FE
-    const productsWithImage = foundProducts.map((p) => ({
-      _id: p._id,
-      name: p.name,
-      price: p.price,
-      stock: p.stock,
-      category: p.category,
-      description: p.description,
-      image:
-        Array.isArray(p.imageUrl) && p.imageUrl.length > 0
-          ? p.imageUrl[0]
-          : typeof p.imageUrl === "string"
-          ? p.imageUrl
-          : null,
-    }));
-
+    // Trả kết quả về Frontend
     res.json({
       reply,
-      products: productsWithImage,
+      products: processProductsImages(foundProducts),
       showProducts: foundProducts.length > 0,
     });
+
   } catch (err) {
-    console.error("❌ Lỗi /api/chat:", err);
-    res.status(500).json({ error: "Lỗi khi xử lý yêu cầu AI" });
+    console.error("❌ Lỗi Chat AI:", err);
+    res.status(500).json({ error: "Lỗi xử lý server" });
   }
 });
 
+// Hàm phụ trợ xử lý ảnh (để tránh lỗi null/array)
+const processProductsImages = (products) => {
+  return products.map(p => ({
+    _id: p._id,
+    name: p.name,
+    price: p.price,
+    image: Array.isArray(p.imageUrl) ? p.imageUrl[0] : p.imageUrl,
+    category: p.category
+  }));
+};
+
 export default router;
-
-
-
-
