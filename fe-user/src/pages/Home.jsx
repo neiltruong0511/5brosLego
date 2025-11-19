@@ -6,7 +6,7 @@ import AppStore from '../components/AppStore/AppStore'
 import Testimonial from '../components/Testimonial/Testimonial'
 
 
-import About from '../About/About' 
+import About from '../pages/About/About' 
 
 const Home = () => {
   return (
