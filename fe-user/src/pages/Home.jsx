@@ -5,30 +5,22 @@ import Banner from '../components/Banner/Banner'
 import AppStore from '../components/AppStore/AppStore'
 import Testimonial from '../components/Testimonial/Testimonial'
 
-
-import About from './About' 
-
 const Home = () => {
   return (
-    <div>
-      {/* Component phần tiêu đề chính */}
-      <Hero />
+    <div>{/* Component phần tiêu đề chính */}
+    <Hero />
 
+    {/* Component giới thiệu dịch vụ */}
+    <Services />
 
-      <About />
+    {/* Banner đầu tiên */}
+    <Banner />
 
-      {/* Component giới thiệu dịch vụ */}
-      <Services />
+    {/* Liên kết đến App Store */}
+    <AppStore />
 
-      {/* Banner đầu tiên */}
-      <Banner />
-
-      {/* Liên kết đến App Store */}
-      <AppStore />
-
-      {/* Phản hồi khách hàng */}
-      <Testimonial />
-    </div>
+    {/* Phản hồi khách hàng */}
+    <Testimonial /></div>
   )
 }
 
