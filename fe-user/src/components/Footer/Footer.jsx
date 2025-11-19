@@ -15,10 +15,11 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 py-5">
           {/* Cột 1 (chiếm 2 cột) */}
           <div className="md:col-span-2 py-8">
-            <h1 className="text-2xl font-bold flex items-center gap-3 mb-3">
-              <img src={footerLogo} alt="Logo" className="max-w-[50px]" />
+            <h2 className="text-2xl font-bold flex items-center gap-3 mb-3">
+              {/* [TỐI ƯU] Thêm tên thương hiệu vào alt */}
+              <img src={footerLogo} alt="5BROSLEGO Logo" className="max-w-[50px]" />
               <span className="text-500">5BROSLEGO</span>
-            </h1>
+            </h2>
             <p>
               5BROSLEGO là cửa hàng mang đến không gian sáng tạo và giải trí tuyệt vời,
               nơi bạn có thể thỏa sức khám phá những bộ LEGO độc đáo và tinh xảo.
@@ -50,30 +51,30 @@ const Footer = () => {
           <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 md:pl-10">
             {/* Cột Important Links */}
             <div className="py-8">
-              <h1 className="text-xl font-bold mb-3 hover:underline underline-offset-4 decoration-orange-400 transition-all duration-200">
+              <h2 className="text-xl font-bold mb-3 hover:underline underline-offset-4 decoration-orange-400 transition-all duration-200">
                 Important Links
-              </h1>
+              </h2>
               <ul className="flex flex-col gap-3 text-gray-700 dark:text-gray-300">
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href = "https://5broslego.click/">Home</a>
-                  </li>
+                  <a href="https://5broslego.click/">Home</a>
+                </li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href= "https://5broslego.click/about">About</a>
-                  </li>
+                  <a href="https://5broslego.click/about">About</a>
+                </li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href= "https://5broslego.click/#services">Service</a>
-                  </li>
+                  <a href="https://5broslego.click/#services">Service</a>
+                </li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">
-                  <a href= "https://5broslego.click/login">Login</a>
-                  </li>
+                  <a href="https://5broslego.click/login">Login</a>
+                </li>
               </ul>
             </div>
 
             {/* Cột Social Media */}
             <div className="py-8">
-              <h1 className="text-xl font-bold mb-3 hover:underline underline-offset-4 decoration-orange-400 transition-all duration-200">
+              <h2 className="text-xl font-bold mb-3 hover:underline underline-offset-4 decoration-orange-400 transition-all duration-200">
                 Social Media
-              </h1>
+              </h2>
               <ul className="flex flex-col gap-3 text-gray-700 dark:text-gray-300">
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">Our Social Instagram</li>
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">5BROSLEGO</li>
@@ -82,9 +83,9 @@ const Footer = () => {
 
             {/* Cột Support Email */}
             <div className="py-8">
-              <h1 className="text-xl font-bold mb-3 hover:underline underline-offset-4 decoration-orange-400 transition-all duration-200">
+              <h2 className="text-xl font-bold mb-3 hover:underline underline-offset-4 decoration-orange-400 transition-all duration-200">
                 Support Email
-              </h1>
+              </h2>
               <ul className="flex flex-col gap-3 text-gray-700 dark:text-gray-300">
                 <li className="cursor-pointer hover:text-orange-500 transition-all duration-200">5BROSLEGO@gmail.com</li>
               </ul>
