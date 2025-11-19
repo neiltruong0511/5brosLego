@@ -2,27 +2,33 @@ import React from 'react'
 import Hero from '../components/Hero/Hero'
 import Services from '../components/Services/Services'
 import Banner from '../components/Banner/Banner'
-import About from '../../components/About/About';
 import AppStore from '../components/AppStore/AppStore'
 import Testimonial from '../components/Testimonial/Testimonial'
 
+
+import About from '../About/About' 
+
 const Home = () => {
   return (
-    <div>{/* Component phần tiêu đề chính */}
-    <Hero />
+    <div>
+      {/* Component phần tiêu đề chính */}
+      <Hero />
 
-    {/* Component giới thiệu dịch vụ */}
-    <Services />
+      {/* About */}
+      <About />
 
-    {/* Banner đầu tiên */}
-    <Banner />
-    
-    <About />
-    {/* Liên kết đến App Store */}
-    <AppStore />
+      {/* Component giới thiệu dịch vụ */}
+      <Services />
 
-    {/* Phản hồi khách hàng */}
-    <Testimonial /></div>
+      {/* Banner đầu tiên */}
+      <Banner />
+
+      {/* Liên kết đến App Store */}
+      <AppStore />
+
+      {/* Phản hồi khách hàng */}
+      <Testimonial />
+    </div>
   )
 }
 
