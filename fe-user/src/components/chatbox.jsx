@@ -30,7 +30,7 @@ const Chatbox = () => {
     try {
       // GỌI API (Đổi URL nếu bạn đã deploy lên render)
       // Ví dụ: const API_URL = "https://fivebroslego.onrender.com/api/chat";
-      const API_URL = "http://localhost:5000/api/chat"; 
+      const API_URL = "https://fivebroslego.onrender.com/api/chat"; 
       
       const response = await axios.post(API_URL, {
         message: content,
