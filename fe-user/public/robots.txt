@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://5broslego.click/sitemap.xml
+
