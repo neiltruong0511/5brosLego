@@ -1,39 +1,36 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Send, X, MapPin, Phone } from "lucide-react"; // Thêm icon
-import { Link } from "react-router-dom";
+import { MessageCircle, Send, X } from "lucide-react";
+import { Link } from "react-router-dom"; // Để chuyển hướng sang trang chi tiết
 
 const Chatbox = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    { from: "bot", text: "👋 Chào bạn! Mình là trợ lý 5BROSLEGO 🧱. Bạn cần tìm bộ LEGO nào hôm nay?" },
+    { from: "bot", text: "👋 Chào bạn! Mình là trợ lý 5BROSLEGO 🧱. Bạn cần tìm bộ LEGO nào? (Ví dụ: Xe đua, Nhà cửa, Ninjago...)" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestedProducts, setSuggestedProducts] = useState([]);
   const chatEndRef = useRef(null);
 
-  // Tự động cuộn xuống cuối
+  // Tự động cuộn
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, suggestedProducts, isLoading]);
+  }, [messages, isLoading, isOpen]);
 
   const sendMessage = async (customMessage) => {
     const content = customMessage || input.trim();
     if (!content) return;
 
-    // 1. Hiển thị tin nhắn người dùng
     const userMessage = { from: "user", text: content };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-    setSuggestedProducts([]); // Reset gợi ý cũ
 
     try {
-      // 2. Gọi API (Lưu ý: Đổi URL nếu chạy localhost)
-      const API_URL = "https://fivebroslego.onrender.com/api/chat"; 
-      // Hoặc dùng: const API_URL = "http://localhost:5000/api/chat";
+      // GỌI API (Đổi URL nếu bạn đã deploy lên render)
+      // Ví dụ: const API_URL = "https://fivebroslego.onrender.com/api/chat";
+      const API_URL = "http://localhost:5000/api/chat"; 
       
       const response = await axios.post(API_URL, {
         message: content,
@@ -43,33 +40,29 @@ const Chatbox = () => {
         })),
       });
 
-      const { reply, products, showProducts } = response.data;
+      const { reply, products } = response.data;
 
-      // 3. Hiển thị phản hồi AI
-      setMessages((prev) => [...prev, { from: "bot", text: reply }]);
-      
-      // 4. Hiển thị sản phẩm nếu có
-      if (showProducts && products?.length > 0) {
-        setSuggestedProducts(products);
-      }
+      setMessages((prev) => [
+        ...prev, 
+        { 
+          from: "bot", 
+          text: reply,
+          products: products || [] 
+        }
+      ]);
 
     } catch (err) {
-      console.error("❌ Lỗi Chat:", err);
+      console.error("Lỗi Chat:", err);
       setMessages((prev) => [
         ...prev,
-        { from: "bot", text: "😅 Mạng đang chập chờn chút, bạn hỏi lại giúp mình nhé!" },
+        { from: "bot", text: "😅 Mạng đang chập chờn, bạn thử lại giúp mình nhé!" },
       ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const quickReplies = [
-    "Xem hàng mới về 📦",
-    "LEGO City 🚓",
-    "LEGO Ninjago 🐉",
-    "Địa chỉ shop ở đâu? 📍",
-  ];
+  const quickReplies = ["LEGO Mới nhất 📦", "LEGO City 🚓", "LEGO Ninjago 🐉", "Địa chỉ shop 📍"];
 
   return (
     <>
@@ -83,7 +76,7 @@ const Chatbox = () => {
         {isOpen ? <X size={28} /> : <MessageCircle size={28} fill="white" />}
       </motion.button>
 
-      {/* Giao diện Chat */}
+      {/* Khung Chat */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -93,115 +86,105 @@ const Chatbox = () => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
           >
             {/* Header */}
-            <div className="bg-yellow-500 p-4 flex justify-between items-center shadow-sm">
+            <div className="bg-yellow-500 p-4 flex justify-between items-center text-white shadow-md">
               <div className="flex items-center gap-2">
-                <div className="bg-white p-1 rounded-full">
-                  <img src="https://img.icons8.com/color/48/lego.png" alt="Logo" className="w-6 h-6"/>
-                </div>
+                <span className="text-2xl">🤖</span>
                 <div>
-                  <h3 className="text-white font-bold text-lg leading-none">5BROSLEGO AI</h3>
-                  <span className="text-yellow-100 text-xs flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Online
-                  </span>
+                  <h3 className="font-bold text-lg leading-none">5BROSLEGO AI</h3>
+                  <span className="text-xs text-yellow-100">Luôn sẵn sàng hỗ trợ</span>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white hover:bg-yellow-600 p-1 rounded">
-                <X size={20} />
-              </button>
+              <button onClick={() => setIsOpen(false)}><X size={20} /></button>
             </div>
 
             {/* Nội dung Chat */}
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-50 max-h-[400px] min-h-[300px]">
-              <div className="space-y-3">
-                {messages.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`px-4 py-2 rounded-2xl text-sm max-w-[80%] shadow-sm ${
-                        msg.from === "user"
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-white text-gray-800 border border-gray-100 rounded-bl-none"
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
+            <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4 max-h-[450px]">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex flex-col ${msg.from === "user" ? "items-end" : "items-start"}`}>
+                  
+                  {/* Bong bóng tin nhắn */}
+                  <div
+                    className={`px-4 py-2 rounded-2xl text-sm max-w-[85%] shadow-sm whitespace-pre-line ${
+                      msg.from === "user"
+                        ? "bg-blue-600 text-white rounded-br-none"
+                        : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                    }`}
+                  >
+                    {msg.text}
                   </div>
-                ))}
-                
-                {/* Typing Indicator */}
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-gray-100 shadow-sm flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
-                    </div>
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-            </div>
 
-            {/* Khu vực hiển thị sản phẩm gợi ý */}
-            {suggestedProducts.length > 0 && (
-              <div className="bg-gray-100 p-3 border-t border-gray-200">
-                <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Có thể bạn sẽ thích:</p>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  {suggestedProducts.map((p) => (
-                    <Link
-                      key={p._id}
-                      to={`/product/${p._id}`}
-                      className="min-w-[120px] w-[120px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all flex flex-col"
-                    >
-                      <div className="h-24 bg-gray-100 w-full flex items-center justify-center">
-                         <img
-                          src={p.image || "https://via.placeholder.com/100"}
-                          alt={p.name}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                      <div className="p-2 flex flex-col flex-1 justify-between">
-                        <h4 className="text-xs font-medium truncate text-gray-800" title={p.name}>{p.name}</h4>
-                        <span className="text-red-600 font-bold text-xs mt-1">
-                          {p.price?.toLocaleString()}đ
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+                  {/* --- HIỂN THỊ SẢN PHẨM GỢI Ý --- */}
+                  {msg.products && msg.products.length > 0 && (
+                    <div className="mt-2 w-[90%] grid grid-cols-1 gap-2">
+                      <p className="text-xs text-gray-500 font-bold ml-1 uppercase">Sản phẩm đề xuất:</p>
+                      {msg.products.map((product) => (
+                        <Link 
+                          key={product._id} 
+                          to={`/product/${product._id}`} // Link tới trang chi tiết
+                          className="flex bg-white p-2 rounded-lg border border-gray-200 hover:shadow-md hover:border-yellow-400 transition items-center gap-3 no-underline"
+                          onClick={() => setIsOpen(false)} // Tự động đóng chat khi bấm xem
+                        >
+                          <div className="w-14 h-14 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                            <img 
+                              src={product.image || "https://via.placeholder.com/150"} 
+                              alt={product.name} 
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-xs font-bold text-gray-800 truncate">{product.name}</h4>
+                            <p className="text-red-600 text-xs font-bold mt-1">
+                              {product.price?.toLocaleString()}đ
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              ))}
+              
+              {/* Loading indicator */}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-200 px-3 py-1 rounded-full text-xs text-gray-500 animate-pulse">
+                    Đang soạn tin...
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
 
             {/* Input Area */}
             <div className="bg-white border-t p-3">
-              {/* Gợi ý nhanh */}
-              <div className="flex gap-2 overflow-x-auto mb-2 scrollbar-hide">
-                {quickReplies.map((text, i) => (
+              <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
+                {quickReplies.map((text, index) => (
                   <button
-                    key={i}
+                    key={index}
                     onClick={() => sendMessage(text)}
-                    className="whitespace-nowrap px-3 py-1 bg-gray-100 hover:bg-blue-50 text-gray-600 text-xs rounded-full border border-gray-200 transition"
+                    className="whitespace-nowrap px-3 py-1 bg-gray-100 hover:bg-blue-50 text-blue-600 text-xs rounded-full border border-gray-200 transition"
                   >
                     {text}
                   </button>
                 ))}
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 relative">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder="Nhập tin nhắn..."
-                  className="flex-1 bg-gray-100 text-gray-800 text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition"
+                  className="flex-1 bg-gray-100 text-sm rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   disabled={isLoading}
                 />
                 <button
                   onClick={() => sendMessage()}
                   disabled={isLoading || !input.trim()}
-                  className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 disabled:bg-gray-300 transition-all"
+                  className="absolute right-1 top-1 bg-yellow-500 text-white p-1.5 rounded-full hover:bg-yellow-600 disabled:bg-gray-300 transition"
                 >
-                  <Send size={18} />
+                  <Send size={16} />
                 </button>
               </div>
             </div>
