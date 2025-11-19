@@ -13,7 +13,7 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "", 
+    subject: "",
     message: "",
   });
 
@@ -24,6 +24,7 @@ const ContactPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    // Có thể thay alert bằng toast message đẹp hơn nếu muốn
     alert("Cảm ơn bạn! Chúng tôi đã nhận được tin nhắn của bạn.");
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
@@ -44,20 +45,20 @@ const ContactPage = () => {
 
         {/* Thông tin liên hệ */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center">
+          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center hover:shadow-lg transition-shadow">
             <FaMapMarkerAlt className="text-3xl text-yellow-500 mb-2" />
-            <h3 className="font-bold mb-1">Địa chỉ</h3>
-            <p>5 Đặng Thùy Trâm, Phường 25, Bình Thạnh, TP.Hồ Chí Minh</p>
+            <h3 className="font-bold mb-1 text-lg">Địa chỉ</h3>
+            <p className="text-gray-600">5 Đặng Thùy Trâm, Phường 25, Bình Thạnh, TP.HCM</p>
           </div>
-          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center">
+          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center hover:shadow-lg transition-shadow">
             <FaPhoneAlt className="text-3xl text-red-500 mb-2" />
-            <h3 className="font-bold mb-1">Số điện thoại</h3>
-            <p>+98 7463921</p>
+            <h3 className="font-bold mb-1 text-lg">Số điện thoại</h3>
+            <p className="text-gray-600">+98 7463921</p>
           </div>
-          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center">
+          <div className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md text-center hover:shadow-lg transition-shadow">
             <FaEnvelope className="text-3xl text-blue-500 mb-2" />
-            <h3 className="font-bold mb-1">Email</h3>
-            <p>5BROSLEGO@gmail.com</p>
+            <h3 className="font-bold mb-1 text-lg">Email</h3>
+            <p className="text-gray-600">5BROSLEGO@gmail.com</p>
           </div>
         </div>
 
@@ -74,7 +75,7 @@ const ContactPage = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              className="px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
             />
             <input
               type="email"
@@ -83,7 +84,7 @@ const ContactPage = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
             />
             <input
               type="text"
@@ -92,7 +93,7 @@ const ContactPage = () => {
               value={formData.subject}
               onChange={handleChange}
               required
-              className="px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
             />
             <textarea
               name="message"
@@ -101,11 +102,11 @@ const ContactPage = () => {
               value={formData.message}
               onChange={handleChange}
               required
-              className="px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
             ></textarea>
             <button
               type="submit"
-              className="w-full py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-transform transform hover:scale-105"
+              className="w-full py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-transform transform hover:scale-105 active:scale-95 shadow-lg"
             >
               Gửi liên hệ
             </button>
@@ -118,10 +119,12 @@ const ContactPage = () => {
             Bản đồ
           </h2>
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.621234567890!2d105.8160004154214!3d21.02851139355702!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab3f8e4a2a11%3A0xa8f2b48e4e7cd123!2s123%20Lego%20Street%2C%20Hanoi%2C%20Vietnam!5e0!3m2!1sen!2s!4v1699999999999!5m2!1sen!2s"
-            className="w-full h-96 rounded-2xl shadow-md"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.924938002459!2d106.69872431480118!3d10.816563292294356!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528e1f241211f%3A0xc9ef195798144b1f!2zNSDEkOG6t25nIFRow7l5IFRyw6JtLCBQaMaw4budbmcgMTMsIELDrG5oIFRo4bqhbmgsIFRow6BuaCBwaOG7kSBI4buTIENow60gTWluaA!5e0!3m2!1svi!2s!4v1695141234567!5m2!1svi!2s"
+            className="w-full h-96 rounded-2xl shadow-md border-0"
             allowFullScreen=""
             loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Google Map 5BROSLEGO"
           ></iframe>
         </div>
 
@@ -131,26 +134,30 @@ const ContactPage = () => {
             Kết nối với chúng tôi
           </h2>
           <div className="flex justify-center gap-6">
+            {/* [FIX] Thêm aria-label cho SEO */}
             <a
               href="https://www.facebook.com/5BROSLEGO"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Facebook"
             >
-              <FaFacebookF className="text-2xl text-blue-600 hover:scale-110 transition-transform" />
+              <FaFacebookF className="text-2xl text-blue-600 hover:scale-125 transition-transform duration-200" />
             </a>
             <a
               href="https://www.instagram.com/5BROSLEGO"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Instagram"
             >
-              <FaInstagram className="text-2xl text-pink-500 hover:scale-110 transition-transform" />
+              <FaInstagram className="text-2xl text-pink-500 hover:scale-125 transition-transform duration-200" />
             </a>
             <a
               href="https://www.youtube.com/@5BROSLEGO"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="YouTube"
             >
-              <FaYoutube className="text-2xl text-red-600 hover:scale-110 transition-transform" />
+              <FaYoutube className="text-2xl text-red-600 hover:scale-125 transition-transform duration-200" />
             </a>
           </div>
         </div>
