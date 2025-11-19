@@ -68,4 +68,4 @@ productSchema.pre('save', function (next) {
 
 // Tạo model
 const Product = mongoose.model('Product', productSchema);
-module.exports = Product;
+export default Product;
