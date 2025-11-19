@@ -7,7 +7,8 @@ const dotenv = require("dotenv");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const apiRoutes = require("./api"); 
 const OpenAI = require("openai"); 
-const Product = require("./models/ProductModels"); // ✅ Import Model Sản Phẩm
+// 👇 QUAN TRỌNG: Phải import Model Sản phẩm để tìm kiếm
+const Product = require("./models/ProductModels"); 
 
 dotenv.config();
 const app = express();
@@ -15,7 +16,8 @@ const app = express();
 // ==================== Middleware ====================
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000", "https://5broslego.click"],
+    // Cho phép localhost và domain thật truy cập
+    origin: ["http://localhost:5173", "http://localhost:3000", "https://5broslego.click", "https://www.5broslego.click"],
     credentials: true,
   })
 );
@@ -23,10 +25,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Mount main API routes
 app.use("/api", apiRoutes);
 
-// ==================== LEGO Chatbot API (Đã nâng cấp) ====================
+// ==================== 🤖 CHATBOT THÔNG MINH (V2) ====================
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -39,16 +40,19 @@ app.post("/api/chat", async (req, res) => {
     const userMsg = message.toLowerCase();
     let foundProducts = [];
     let isShowAll = false;
+    let systemInstruction = ""; // Chỉ thị riêng cho từng trường hợp
 
-    // 1. XỬ LÝ TÌM KIẾM SẢN PHẨM TỪ DB
-    // A. Khách muốn xem hàng mới / tất cả
+    // --- 1. XỬ LÝ TÌM KIẾM SẢN PHẨM TỪ MONGODB ---
+    
+    // A. Khách muốn xem "Tất cả" hoặc "Mới nhất"
     if (userMsg.match(/(tất cả|all|danh sách|mới nhất|show|xem hàng|sản phẩm)/) && !userMsg.match(/(tìm|giá|lego)/)) {
       foundProducts = await Product.find().sort({ createdAt: -1 }).limit(6).lean();
       isShowAll = true;
     } 
-    // B. Khách tìm cụ thể
+    // B. Khách tìm cụ thể (Ví dụ: "Lego Technic", "Xe đua")
     else {
-      const categories = ["Architecture", "City", "Friends", "Technic", "Ninjago", "DC Super Heroes", "Star Wars"];
+      // Danh sách từ khóa danh mục
+      const categories = ["Architecture", "City", "Friends", "Technic", "Ninjago", "DC Super Heroes", "Star Wars", "Harry Potter"];
       const detectedCategory = categories.find(cat => userMsg.includes(cat.toLowerCase()));
       
       let query = {};
@@ -63,48 +67,65 @@ app.post("/api/chat", async (req, res) => {
         };
       }
 
-      const isShoppingIntent = /(lego|giá|mua|tìm|có mẫu|bộ|set|bi nhiêu|tư vấn|shop)/.test(userMsg);
+      // Chỉ tìm nếu khách có ý định mua/xem
+      const isShoppingIntent = /(lego|giá|mua|tìm|có mẫu|bộ|set|bi nhiêu|tư vấn|shop|xe|nhà|rồng)/.test(userMsg);
+      
       if (isShoppingIntent || detectedCategory) {
         foundProducts = await Product.find(query).limit(5).lean();
       }
     }
 
-    // Hàm xử lý ảnh (Tránh lỗi null)
+    // Hàm xử lý ảnh (để frontend không bị lỗi)
     const processProducts = (products) => {
       return products.map(p => ({
         _id: p._id,
         name: p.name,
         price: p.price,
-        image: (p.imageUrl && p.imageUrl.length > 0) ? p.imageUrl[0] : "",
+        image: (p.imageUrl && p.imageUrl.length > 0) ? p.imageUrl[0] : "https://via.placeholder.com/150",
         category: p.category
       }));
     };
 
-    // Trả về ngay nếu chỉ xem danh sách
+    // Nếu là xem danh sách -> Trả về luôn
     if (isShowAll) {
       return res.json({
-        reply: "Dạ đây là những mẫu LEGO mới nhất tại 5BROSLEGO ạ! Bạn xem ưng mẫu nào không nhé? 👇",
+        reply: "Dạ đây là những bộ LEGO mới nhất vừa cập bến 5BROSLEGO ạ! Bạn xem ưng mẫu nào không nhé? 👇",
         products: processProducts(foundProducts),
         showProducts: true,
       });
     }
 
-    // 2. GỬI CHO AI (OPENAI)
+    // --- 2. CHUẨN BỊ KỊCH BẢN CHO AI ---
+
     let productContext = "";
     if (foundProducts.length > 0) {
+      // Nếu tìm thấy sản phẩm -> Gửi danh sách cho AI đọc
       const list = foundProducts.map((p, i) => `${i+1}. ${p.name} | Giá: ${p.price?.toLocaleString()}đ`).join("\n");
-      productContext = `DỮ LIỆU SẢN PHẨM TÌM THẤY:\n${list}\n\n-> Hãy giới thiệu các sản phẩm này cho khách.`;
+      productContext = `\n[HỆ THỐNG ĐÃ TÌM THẤY CÁC SẢN PHẨM NÀY TRONG KHO]:\n${list}\n\n-> YÊU CẦU: Hãy giới thiệu ngắn gọn các sản phẩm trên và mời khách xem hình ảnh bên dưới.`;
     } else {
-      productContext = "Không tìm thấy sản phẩm nào khớp. Hãy gợi ý khách xem các danh mục khác.";
+      // Nếu không tìm thấy -> Dặn AI xin lỗi
+      productContext = "\n[HỆ THỐNG]: Không tìm thấy sản phẩm nào khớp với từ khóa trong Database. Hãy xin lỗi khách khéo léo và gợi ý khách xem các dòng 'LEGO City' hoặc 'Ninjago'.";
     }
 
+    // 🔥 SYSTEM PROMPT CỐ ĐỊNH (CHỨA ĐỊA CHỈ)
+    const systemPrompt = `
+    Bạn là Trợ lý ảo của shop "5BROSLEGO" (Website: https://5broslego.click/).
+    
+    THÔNG TIN BẮT BUỘC PHẢI NHỚ:
+    - Địa chỉ shop: Số 5 Đặng Thùy Trâm, Phường 25, Quận Bình Thạnh, TP.HCM.
+    - SĐT: 098 746 3921.
+    - Giờ mở cửa: 8:00 - 21:00 hằng ngày.
+
+    QUY TẮC TRẢ LỜI:
+    1. Nếu khách hỏi địa chỉ -> Bắt buộc trả lời chính xác địa chỉ trên.
+    2. Nếu hệ thống cung cấp danh sách sản phẩm -> Hãy giới thiệu và báo giá.
+    3. Thân thiện, dùng emoji 😄 🧱. Trả lời ngắn gọn.
+    `;
+
     const messages = [
-      {
-        role: "system",
-        content: "Bạn là trợ lý ảo của shop 5BROSLEGO (5 Đặng Thùy Trâm, Bình Thạnh). Thân thiện, dùng emoji 😄. Chỉ tư vấn dựa trên dữ liệu được cung cấp.",
-      },
+      { role: "system", content: systemPrompt },
       ...(Array.isArray(history) ? history : []),
-      { role: "user", content: `${message}\n\n${productContext}` },
+      { role: "user", content: `${message}\n${productContext}` },
     ];
 
     const completion = await client.chat.completions.create({
@@ -113,7 +134,7 @@ app.post("/api/chat", async (req, res) => {
       max_tokens: 400,
     });
 
-    const reply = completion.choices?.[0]?.message?.content || "Xin lỗi, tôi chưa rõ ý bạn.";
+    const reply = completion.choices?.[0]?.message?.content || "Xin lỗi, mình đang kết nối lại với tổng đài LEGO.";
 
     res.json({
       reply,
@@ -122,8 +143,8 @@ app.post("/api/chat", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Lỗi chat API:", error);
-    res.status(500).json({ error: "Lỗi Server Chatbot" });
+    console.error("❌ Lỗi Chatbot:", error);
+    res.status(500).json({ error: "Lỗi xử lý phía server." });
   }
 });
 // ======================================================
