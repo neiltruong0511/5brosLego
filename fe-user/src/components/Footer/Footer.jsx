@@ -35,16 +35,36 @@ const Footer = () => {
               <p>+98 7463921</p>
             </div>
             <div className="flex items-center gap-4 mt-6">
-              <a href="https://www.instagram.com/wolsom/" className="hover:text-[#E1306C] transition-all duration-200">
-                <FaInstagram className="text-3xl" />
-              </a>
-              <a href="https://www.instagram.com/wolsom/" className="hover:text-[#1877F2] transition-all duration-200">
-                <FaFacebook className="text-3xl" />
-              </a>
-              <a href="https://www.instagram.com/wolsom/" className="hover:text-[#0A66C2]  transition-all duration-200">
-                <FaLinkedin className="text-3xl" />
-              </a>
-            </div>
+            {/* Instagram */}
+            <a 
+              href="https://www.instagram.com/5BROSLEGO" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-[#E1306C] transition-all duration-200"
+            >
+              <FaInstagram className="text-3xl" />
+            </a>
+
+            {/* Facebook */}
+            <a 
+              href="https://www.facebook.com/5BROSLEGO" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-[#1877F2] transition-all duration-200"
+            >
+              <FaFacebook className="text-3xl" />
+            </a>
+
+            {/* LinkedIn */}
+            <a 
+              href="https://www.linkedin.com/in/5BROSLEGO" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-[#0A66C2] transition-all duration-200"
+            >
+              <FaLinkedin className="text-3xl" />
+            </a>
+          </div>
           </div>
 
           {/* Cột 2, 3, 4 */}
